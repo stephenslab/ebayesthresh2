@@ -1,0 +1,97 @@
+---
+title: "Introduction to ebayesthresh2"
+author: "Matthew Stephens"
+date: 2017-02-27
+output: html_document
+---
+
+```{r read-chunk, include=FALSE, cache=FALSE}
+knitr::read_chunk("chunks.R")
+```
+
+```{r knitr-opts-chunk, include=FALSE}
+```
+
+**Last updated:** `r Sys.Date()`
+
+**Code version:** `r workflowr::extract_commit(".", 1)$sha1`
+
+
+## EbayesThresh
+
+The `EbayesThresh` package implements an Empirical Bayes approach to shrinkage for the normal means problem. There are various options, but the one I am interested in is the Laplace option.
+Specifically, with this option, the function `ebayesthresh` solves the following "normal means" problem:
+Data $x_1,\dots,x_n$ are assumed to be from
+$$x_j | \mu_j \sim N(\mu_j,s^2)$$
+where
+$$\mu_j \sim \pi_0 \delta_0 + (1-\pi_0) \text{DExp}(a)$$
+where $\text{Dexp}(a)$ denotes the double exponential distribution with parameter $a$.
+
+The Empirical Bayes approach estimates both $\pi_0$ and $a$ by maximum likelihood
+applied to the data $x_1,\dots,x_n$. Then it estimates each $\mu_j$ by its posterior mean (or 
+posterior median is also an option).
+
+Here is an example. (Note that setting `a=NA` indicates that `a` is to be estimated.)
+```{r}
+set.seed(1)
+s = 1 # standard error
+mu = rnorm(100)
+x = mu + rnorm(100,0,s)
+muhat.ebt = EbayesThresh::ebayesthresh(x,"laplace",a=NA,sdev=s,threshrule="mean") 
+plot(mu,muhat.ebt)
+mean((mu-x)^2)
+mean((mu-muhat.ebt)^2)
+```
+
+And here is the same idea in `ashr` package:
+```{r}
+library("ashr")
+x.ash = ash(x,s,method="shrink")
+plot(mu,get_pm(x.ash))
+mean((mu-get_pm(x.ash))^2)
+```
+
+You can see both methods are effective at reducing the Mean Squared Error compared with
+the observations $x$. This is the benefit of "shrinkage".
+
+# Problems
+
+There are 3 problems to investigate, perhaps in increasing order of difficulty. All are summarized here.
+
+## Problem 1: ebayesthresh crashes when the signal is very large
+
+Here is an example where the mu are very large. What should happen is that a is estimated to be big, and very little shrinkage is performed. But it crashes:
+```{r}
+  set.seed(1)
+  mu = rnorm(100,0,20)
+  x = mu + rnorm(100,0,1)
+  res=try(EbayesThresh::ebayesthresh(x,"laplace",a=NA,sdev=1,threshrule="mean"))
+  print(res) #note i have to put it into the try() phrase to avoid my Rmd file crashing....
+```
+
+## Problem 2: ebayesthresh does not perform well when the signal is large
+
+This is illustrated in the comparisons [here](https://stephens999.github.io/dsc-normalmeans/).
+Maybe we can put together a simple example:
+```{r}
+  set.seed(1)
+  mu = rnorm(100,0,10)
+  x = mu + rnorm(100,0,1)
+  muhat.ebt = EbayesThresh::ebayesthresh(x,"laplace",a=NA,sdev=1,threshrule="mean")
+  x.ash = ashr::ash(x,1,method="shrink")
+  mean((muhat.ebt-mu)^2)
+  mean((get_pm(x.ash)-mu)^2)
+```
+
+## Problem 3: ebayesthresh does not allow for error variances to vary
+
+It is common to have non-homogenous variances:
+$$x_j | \mu_j \sim N(\mu_j,s_j^2)$$
+
+Can you modify ebayesthresh to allow for this? It seems it should not be too hard in principle,
+but the details need to be worked out.
+
+## Session Information
+
+```{r session-info}
+```
