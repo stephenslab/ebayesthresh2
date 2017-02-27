@@ -310,7 +310,7 @@ div.tocify {
 
 
 <p><strong>Last updated:</strong> 2017-02-27</p>
-<p><strong>Code version:</strong> f64c023</p>
+<p><strong>Code version:</strong> 93f4484</p>
 <div id="ebayesthresh" class="section level2">
 <h2>EbayesThresh</h2>
 <p>The <code>EbayesThresh</code> package implements an Empirical Bayes approach to shrinkage for the normal means problem. There are various options, but the one I am interested in is the Laplace option. Specifically, with this option, the function <code>ebayesthresh</code> solves the following “normal means” problem: Data <span class="math inline">\(x_1,\dots,x_n\)</span> are assumed to be from <span class="math display">\[x_j | \mu_j \sim N(\mu_j,s^2)\]</span> where <span class="math display">\[\mu_j \sim \pi_0 \delta_0 + (1-\pi_0) \text{DExp}(a)\]</span> where <span class="math inline">\(\text{Dexp}(a)\)</span> denotes the double exponential distribution with parameter <span class="math inline">\(a\)</span>.</p>
@@ -322,7 +322,7 @@ mu = rnorm(100)
 x = mu + rnorm(100,0,s)
 muhat.ebt = EbayesThresh::ebayesthresh(x,&quot;laplace&quot;,a=NA,sdev=s,threshrule=&quot;mean&quot;) 
 plot(mu,muhat.ebt)</code></pre>
-<p><img src="figure/intro.Rmd/unnamed-chunk-1-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/intro.Rmd/unnamed-chunk-4-1.png" width="672" style="display: block; margin: auto;" /></p>
 <pre class="r"><code>mean((mu-x)^2)</code></pre>
 <pre><code>[1] 0.9097864</code></pre>
 <pre class="r"><code>mean((mu-muhat.ebt)^2)</code></pre>
@@ -331,10 +331,14 @@ plot(mu,muhat.ebt)</code></pre>
 <pre class="r"><code>library(&quot;ashr&quot;)
 x.ash = ash(x,s,method=&quot;shrink&quot;)
 plot(mu,get_pm(x.ash))</code></pre>
-<p><img src="figure/intro.Rmd/unnamed-chunk-2-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/intro.Rmd/unnamed-chunk-5-1.png" width="672" style="display: block; margin: auto;" /></p>
 <pre class="r"><code>mean((mu-get_pm(x.ash))^2)</code></pre>
 <pre><code>[1] 0.4441689</code></pre>
 <p>You can see both methods are effective at reducing the Mean Squared Error compared with the observations <span class="math inline">\(x\)</span>. This is the benefit of “shrinkage”.</p>
+<p>Note that although the mean squared errors are almost identical, the actual results are different:</p>
+<pre class="r"><code>plot(get_pm(x.ash),muhat.ebt,xlab=&quot;ash estimate&quot;, ylab=&quot;ebayesthresh estimate&quot;,xlim=c(-1.5,1.5),ylim=c(-1.5,1.5))
+abline(a=0,b=1)</code></pre>
+<p><img src="figure/intro.Rmd/unnamed-chunk-6-1.png" width="672" style="display: block; margin: auto;" /></p>
 </div>
 <div id="issues" class="section level1">
 <h1>Issues</h1>
@@ -357,6 +361,10 @@ attr(,&quot;condition&quot;)
 <h2>Issue 2: ebayesthresh does not allow for error variances to vary</h2>
 <p>It is common to have non-homogenous variances: <span class="math display">\[x_j | \mu_j \sim N(\mu_j,s_j^2)\]</span></p>
 <p>Can you modify ebayesthresh to allow for this? It seems it should not be too hard in principle, but the details need to be worked out.</p>
+</div>
+<div id="issue-3-bonus" class="section level2">
+<h2>Issue 3 (bonus)</h2>
+<p>Ok, so I said there were two issues, but if those two don’t take very long, here is another thought. The <code>EbayesThresh</code> package provides a nice interface to wavelet shrinkage using the <code>ebayesthresh.wavelet</code> function which interfaces with the <code>wavethresh</code> package. It would be nice to provide a similar function for <code>ashr</code>, that simply replaces <code>ebayesthresh</code> shrinkage with <code>ashr</code> shrinkage.</p>
 </div>
 <div id="session-information" class="section level2">
 <h2>Session Information</h2>
