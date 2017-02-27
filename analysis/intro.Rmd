@@ -54,9 +54,9 @@ mean((mu-get_pm(x.ash))^2)
 You can see both methods are effective at reducing the Mean Squared Error compared with
 the observations $x$. This is the benefit of "shrinkage".
 
-# Problems
+# Issues
 
-There are 3 problems to investigate, perhaps in increasing order of difficulty. All are summarized here.
+There are 2 issues to investigate. The first is more software related; the second involves more statistical work as well as implementation.
 
 ## Problem 1: ebayesthresh crashes when the signal is very large
 
@@ -69,21 +69,9 @@ Here is an example where the mu are very large. What should happen is that a is 
   print(res) #note i have to put it into the try() phrase to avoid my Rmd file crashing....
 ```
 
-## Problem 2: ebayesthresh does not perform well when the signal is large
 
-This is illustrated in the comparisons [here](https://stephens999.github.io/dsc-normalmeans/).
-Maybe we can put together a simple example:
-```{r}
-  set.seed(1)
-  mu = rnorm(100,0,10)
-  x = mu + rnorm(100,0,1)
-  muhat.ebt = EbayesThresh::ebayesthresh(x,"laplace",a=NA,sdev=1,threshrule="mean")
-  x.ash = ashr::ash(x,1,method="shrink")
-  mean((muhat.ebt-mu)^2)
-  mean((get_pm(x.ash)-mu)^2)
-```
 
-## Problem 3: ebayesthresh does not allow for error variances to vary
+## Issue 2: ebayesthresh does not allow for error variances to vary
 
 It is common to have non-homogenous variances:
 $$x_j | \mu_j \sim N(\mu_j,s_j^2)$$
