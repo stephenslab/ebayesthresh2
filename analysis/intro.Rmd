@@ -54,6 +54,12 @@ mean((mu-get_pm(x.ash))^2)
 You can see both methods are effective at reducing the Mean Squared Error compared with
 the observations $x$. This is the benefit of "shrinkage".
 
+Note that although the mean squared errors are almost identical, the actual results are different:
+```{r}
+plot(get_pm(x.ash),muhat.ebt,xlab="ash estimate", ylab="ebayesthresh estimate",xlim=c(-1.5,1.5),ylim=c(-1.5,1.5))
+abline(a=0,b=1)
+```
+
 # Issues
 
 There are 2 issues to investigate. The first is more software related; the second involves more statistical work as well as implementation.
@@ -78,6 +84,15 @@ $$x_j | \mu_j \sim N(\mu_j,s_j^2)$$
 
 Can you modify ebayesthresh to allow for this? It seems it should not be too hard in principle,
 but the details need to be worked out.
+
+
+## Issue 3 (bonus)
+
+Ok, so I said there were two issues, but if those two don't take very long, here is another thought.
+The `EbayesThresh` package provides a nice interface to wavelet shrinkage using the
+`ebayesthresh.wavelet` function which interfaces with the `wavethresh` package. It would be
+nice to provide a similar function for `ashr`, that simply replaces `ebayesthresh` shrinkage with
+`ashr` shrinkage.
 
 ## Session Information
 
