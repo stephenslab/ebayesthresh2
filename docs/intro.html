@@ -310,7 +310,7 @@ div.tocify {
 
 
 <p><strong>Last updated:</strong> 2017-02-27</p>
-<p><strong>Code version:</strong> ca6d435</p>
+<p><strong>Code version:</strong> f64c023</p>
 <div id="ebayesthresh" class="section level2">
 <h2>EbayesThresh</h2>
 <p>The <code>EbayesThresh</code> package implements an Empirical Bayes approach to shrinkage for the normal means problem. There are various options, but the one I am interested in is the Laplace option. Specifically, with this option, the function <code>ebayesthresh</code> solves the following “normal means” problem: Data <span class="math inline">\(x_1,\dots,x_n\)</span> are assumed to be from <span class="math display">\[x_j | \mu_j \sim N(\mu_j,s^2)\]</span> where <span class="math display">\[\mu_j \sim \pi_0 \delta_0 + (1-\pi_0) \text{DExp}(a)\]</span> where <span class="math inline">\(\text{Dexp}(a)\)</span> denotes the double exponential distribution with parameter <span class="math inline">\(a\)</span>.</p>
@@ -336,9 +336,9 @@ plot(mu,get_pm(x.ash))</code></pre>
 <pre><code>[1] 0.4441689</code></pre>
 <p>You can see both methods are effective at reducing the Mean Squared Error compared with the observations <span class="math inline">\(x\)</span>. This is the benefit of “shrinkage”.</p>
 </div>
-<div id="problems" class="section level1">
-<h1>Problems</h1>
-<p>There are 3 problems to investigate, perhaps in increasing order of difficulty. All are summarized here.</p>
+<div id="issues" class="section level1">
+<h1>Issues</h1>
+<p>There are 2 issues to investigate. The first is more software related; the second involves more statistical work as well as implementation.</p>
 <div id="problem-1-ebayesthresh-crashes-when-the-signal-is-very-large" class="section level2">
 <h2>Problem 1: ebayesthresh crashes when the signal is very large</h2>
 <p>Here is an example where the mu are very large. What should happen is that a is estimated to be big, and very little shrinkage is performed. But it crashes:</p>
@@ -353,21 +353,8 @@ attr(,&quot;class&quot;)
 attr(,&quot;condition&quot;)
 &lt;simpleError in optim(startpar, negloglik.laplace, method = &quot;L-BFGS-B&quot;, lower = lo,     upper = hi, xx = x): L-BFGS-B needs finite values of &#39;fn&#39;&gt;</code></pre>
 </div>
-<div id="problem-2-ebayesthresh-does-not-perform-well-when-the-signal-is-large" class="section level2">
-<h2>Problem 2: ebayesthresh does not perform well when the signal is large</h2>
-<p>This is illustrated in the comparisons <a href="https://stephens999.github.io/dsc-normalmeans/">here</a>. Maybe we can put together a simple example:</p>
-<pre class="r"><code>  set.seed(1)
-  mu = rnorm(100,0,10)
-  x = mu + rnorm(100,0,1)
-  muhat.ebt = EbayesThresh::ebayesthresh(x,&quot;laplace&quot;,a=NA,sdev=1,threshrule=&quot;mean&quot;)
-  x.ash = ashr::ash(x,1,method=&quot;shrink&quot;)
-  mean((muhat.ebt-mu)^2)</code></pre>
-<pre><code>[1] 0.8907397</code></pre>
-<pre class="r"><code>  mean((get_pm(x.ash)-mu)^2)</code></pre>
-<pre><code>[1] 0.8854449</code></pre>
-</div>
-<div id="problem-3-ebayesthresh-does-not-allow-for-error-variances-to-vary" class="section level2">
-<h2>Problem 3: ebayesthresh does not allow for error variances to vary</h2>
+<div id="issue-2-ebayesthresh-does-not-allow-for-error-variances-to-vary" class="section level2">
+<h2>Issue 2: ebayesthresh does not allow for error variances to vary</h2>
 <p>It is common to have non-homogenous variances: <span class="math display">\[x_j | \mu_j \sim N(\mu_j,s_j^2)\]</span></p>
 <p>Can you modify ebayesthresh to allow for this? It seems it should not be too hard in principle, but the details need to be worked out.</p>
 </div>
